@@ -29,9 +29,13 @@ TurtleWoW add-ons are written in Lua but the WoW client ships almost no standard
 ## Quick-start
 
 ```lua
--- At the top of your addon .lua file:
-local F = funk          -- funk.lua populates the global `funk`
-local D = funk_debug    -- funk_debug.lua populates `funk_debug`
+-- ── WoW addon (.toc) — zero global-namespace pollution ──────────────────────
+-- WoW passes (addonName, addonTable) as ... to every file it loads via .toc.
+-- The addonTable is a per-addon namespace shared between all files in the same
+-- .toc.  Nothing is written to _G; other addons are completely unaffected.
+local _, ns = ...        -- capture the WoW per-addon namespace
+local F = ns.funk        -- populated by funk.lua (listed first in .toc)
+local D = ns.funk_debug  -- populated by funk_debug.lua
 
 -- Map / filter / reduce
 local doubled  = F.map({1,2,3,4}, function(x) return x * 2 end)
@@ -295,7 +299,9 @@ funk.chain({1,2,3}):double():value()
 ## Debug utilities (`funk_debug`)
 
 ```lua
-local D = funk_debug
+-- In a WoW addon file (after funk_debug.lua in the .toc):
+local _, ns = ...
+local D = ns.funk_debug
 
 D.log("label", value)            -- grey label + serialised value in chat
 D.dump(value, "optional label")  -- pretty-print any Lua value
@@ -330,11 +336,17 @@ lua5.1 -e "
 
 **Inside WoW (in-game `/run` command):**
 ```lua
-/run funk_test.run()
+/run
+-- Requires funk_test.lua to be loaded in your .toc after funk.lua and funk_debug.lua.
+local _, ns = ...
+ns.funk_test.run()
 ```
-(Requires `funk_test.lua` to be loaded in your `.toc` file after `funk.lua` and `funk_debug.lua`.)
 
-Expected output: `Results: 168 / 168 passed  (0 failed)`
+Expected output: `Results: 171 / 171 passed  (0 failed)`
+
+Three of those tests (`no global pollution` suite) specifically assert that
+`_G.funk`, `_G.funk_debug`, and `_G.funk_test` are **nil** after loading via
+`dofile`, confirming the library does not pollute the global namespace.
 
 ---
 
@@ -357,8 +369,12 @@ MyAddOn.lua
 
 ```lua
 -- MyAddOn.lua
-local F = funk       -- funk.lua sets the global `funk`
-local D = funk_debug
+-- WoW passes (addonName, addonTable) as ... to every .toc file.
+-- funk.lua and funk_debug.lua have already been loaded and stored
+-- themselves in ns, so we read from ns — no _G access at all.
+local _, ns = ...
+local F = ns.funk
+local D = ns.funk_debug
 
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
@@ -406,8 +422,10 @@ end)
 5. **`unpack` not `table.unpack`** — Lua 5.0/5.1 uses the global `unpack`.
    Lua 5.2+ moved it to `table.unpack`.  All code here uses the 5.1 form.
 
-6. **No modules system** — WoW Lua has no `require`.  Each file sets a global
-   variable (`funk`, `funk_debug`, `funk_test`) for cross-file access.
+6. **No global namespace pollution** — WoW Lua has no `require`, but every
+   `.toc` file receives `(addonName, addonTable)` as `...`.  All three library
+   files store themselves in `addonTable` (the per-addon namespace), not in
+   `_G`.  Use `local _, ns = ...` then `local F = ns.funk` in your addon files.
 
 ---
 

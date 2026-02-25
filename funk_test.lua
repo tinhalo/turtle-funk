@@ -16,8 +16,12 @@
 --   Results: 42 passed, 1 failed
 -- =============================================================================
 
-local funk       = funk       or dofile and dofile("funk.lua")       or {}
-local funk_debug = funk_debug or dofile and dofile("funk_debug.lua") or {}
+-- WoW .toc loader provides (addonName, addonTable) as varargs.
+local _addonName, _ns = ...
+
+-- Resolve dependencies: WoW namespace first, then dofile for CLI/standalone.
+local funk       = (_ns and _ns.funk)       or (dofile and dofile("funk.lua"))       or {}
+local funk_debug = (_ns and _ns.funk_debug) or (dofile and dofile("funk_debug.lua")) or {}
 
 -- ---------------------------------------------------------------------------
 -- Minimal serialiser (stand-alone, no funk_debug dependency required).
@@ -591,6 +595,22 @@ local function test_mixin()
         {2,4,6})
 end
 
+-- ── Namespace: no global pollution ───────────────────────────────────────────
+-- When loaded via dofile() (i.e. _ns is nil), none of the libraries should
+-- have written anything to _G.  rawget bypasses __index metamethods so this
+-- is a direct check of the actual global table.
+local function test_no_global_pollution()
+    funk_test.expectNil(
+        "funk.lua does not write _G.funk when loaded via dofile",
+        rawget(_G, "funk"))
+    funk_test.expectNil(
+        "funk_debug.lua does not write _G.funk_debug when loaded via dofile",
+        rawget(_G, "funk_debug"))
+    funk_test.expectNil(
+        "funk_test.lua does not write _G.funk_test when loaded via dofile",
+        rawget(_G, "funk_test"))
+end
+
 -- ---------------------------------------------------------------------------
 -- Run all test suites
 -- ---------------------------------------------------------------------------
@@ -645,6 +665,7 @@ local _SUITES = {
     {"type checks",         test_types},
     {"chaining",            test_chaining},
     {"mixin",               test_mixin},
+    {"no global pollution", test_no_global_pollution},
 }
 
 -- -----------------------------------------------------------------------------
@@ -685,6 +706,8 @@ function funk_test.run()
     return _results.failed == 0
 end
 
--- Expose as a WoW global.
-_G["funk_test"] = funk_test
+-- Share via the WoW per-addon namespace table when available (no _G pollution).
+if _ns ~= nil then
+    _ns.funk_test = funk_test
+end
 return funk_test

@@ -25,13 +25,22 @@
 -- │ Ternary              │ cond ? a : b            │ cond and a or b          │
 -- └──────────────────────────────────────────────────────────────────────────┘
 --
--- USAGE
---   local F = funk   -- or copy-paste this file into your addon folder
+-- USAGE (WoW .toc addon — no global pollution):
+--   local _, ns = ...           -- WoW passes (addonName, addonTable) to every file
+--   local F = ns.funk           -- populated by funk.lua when loaded earlier in .toc
+--
+-- USAGE (standalone / dofile):
+--   local F = dofile("funk.lua")  -- return value is the funk table
 --
 --   F.map({1,2,3}, function(x) return x * 2 end)  --> {2, 4, 6}
 --   F.filter({1,2,3,4}, function(x) return x % 2 == 0 end)  --> {2, 4}
 --   F.reduce({1,2,3,4}, 0, function(acc, x) return acc + x end)  --> 10
 -- =============================================================================
+
+-- WoW's .toc loader passes (addonName, addonTable) as varargs to every file.
+-- Capturing them here lets us share values via the per-addon namespace table
+-- instead of writing to _G.  When loaded via dofile() both will be nil.
+local _addonName, _ns = ...
 
 local funk = {}
 
@@ -1794,8 +1803,13 @@ for name, fn in pairs(funk) do
     end
 end
 
--- Expose as a WoW global so that other files loaded via .toc can reference it
--- as `funk` without needing `require` (which WoW's Lua does not support).
--- When loaded via dofile() in a test harness, the return value is also used.
-_G["funk"] = funk
+-- Share via the WoW per-addon namespace table when available.
+-- This avoids adding anything to _G and keeps the global environment clean.
+-- In WoW: every .toc file receives (addonName, addonTable) as ..., so _ns is
+--         the shared addon table.  Other files in the same addon access the
+--         library via `local _, ns = ...` then `local F = ns.funk`.
+-- Standalone (dofile/require): _ns is nil; use the return value instead.
+if _ns ~= nil then
+    _ns.funk = funk
+end
 return funk

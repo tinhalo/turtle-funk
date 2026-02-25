@@ -19,8 +19,14 @@
 --   D.error("Something broke!")   -- red text in chat frame
 -- =============================================================================
 
--- Grab the funk library if it is available, otherwise define minimal helpers.
-local funk = funk or {}
+-- WoW .toc loader provides (addonName, addonTable) as varargs.
+-- _ns is the per-addon namespace table populated by earlier .toc files.
+-- When loaded via dofile() both are nil.
+local _addonName, _ns = ...
+
+-- Grab the funk library: prefer the namespace, fall back to the global (if the
+-- caller set one deliberately), and finally use an empty stub.
+local funk = (_ns and _ns.funk) or funk or {}
 
 local funk_debug = {}
 
@@ -301,6 +307,8 @@ function funk_debug.serialize(value, maxDepth)
     return _serialize(value, "", 0, maxDepth)
 end
 
--- Expose as a WoW global (same pattern as funk.lua — no require in WoW Lua).
-_G["funk_debug"] = funk_debug
+-- Share via the WoW per-addon namespace table when available (no _G pollution).
+if _ns ~= nil then
+    _ns.funk_debug = funk_debug
+end
 return funk_debug
