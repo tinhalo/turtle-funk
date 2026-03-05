@@ -23,6 +23,20 @@ TurtleWoW add-ons are written in Lua but the WoW client ships almost no standard
 | `funk.lua` | Core functional library — **copy this into your addon** |
 | `funk_debug.lua` | WoW-specific debug output (chat frame, whispers, timers) |
 | `funk_test.lua` | In-game test runner (168 tests, all pass) |
+| `FunkDemo.lua` | In-game interactive demo window — run live examples of every function |
+| `FunkDemo.toc` | WoW addon manifest — loads all files as the `FunkDemo` addon |
+
+---
+
+## FunkDemo — in-game interactive demo
+
+`FunkDemo.toc` bundles all four files as a standalone WoW addon.
+Copy the entire repository folder into your `Interface/AddOns/FunkDemo/` directory, then:
+
+1. Log in and type `/funkdemo` to open the demo window.
+2. Click any button to run that function's demo — output appears in the chat frame.
+3. Use **Previous** / **Next** to page through all 40 demos.
+4. Click **runtests** to execute the full 168-test suite.
 
 ---
 

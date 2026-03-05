@@ -1,0 +1,10 @@
+## Interface: 11200
+## Title: FunkDemo
+## Notes: Interactive in-game test harness and demo window for turtle-funk
+## Author: turtle-funk contributors
+## Version: 1.0
+
+funk.lua
+funk_debug.lua
+funk_test.lua
+FunkDemo.lua
