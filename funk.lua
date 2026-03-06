@@ -40,7 +40,7 @@
 -- WoW's .toc loader passes (addonName, addonTable) as varargs to every file.
 -- Capturing them here lets us share values via the per-addon namespace table
 -- instead of writing to _G.  When loaded via dofile() both will be nil.
-local _addonName, _ns = ...
+local _addonName, _ns = arg[1], arg[2]
 
 local funk = {}
 
