@@ -160,7 +160,7 @@ lua5.1 -e "
 "
 ```
 
-Expected output: `Results: 171 / 171 passed  (0 failed)`
+Expected output: `Results: N / N passed  (0 failed)` (all tests should pass)
 
 ## Documentation
 
