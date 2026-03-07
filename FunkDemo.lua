@@ -296,7 +296,7 @@ end
 local function create_ui()
   if FunkDemoFrame then return end
 
-  frame = CreateFrame("Frame", "FunkDemoFrame", UIParent, "BasicFrame")
+  frame = CreateFrame("Frame", "FunkDemoFrame", UIParent)
   frame:SetWidth(480)
   frame:SetHeight(520)
   frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
@@ -309,7 +309,21 @@ local function create_ui()
   frame:SetScript("OnShow", update_page)
   frame:Hide()  -- Start hidden
 
+  frame:SetBackdrop({
+    bgFile   = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    tile     = true,
+    tileSize = 32,
+    edgeSize = 32,
+    insets   = { left = 11, right = 12, top = 12, bottom = 11 },
+  })
+
+  frame.TitleText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  frame.TitleText:SetPoint("TOP", frame, "TOP", 0, -15)
   frame.TitleText:SetText("Funk Test Harness")  -- Title
+
+  frame.Close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+  frame.Close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -5, -5)
   frame.Close:SetScript("OnClick", function() frame:Hide() end)
 
   -- Page text
