@@ -178,7 +178,7 @@ end
 -- Also fires UIErrorsFrame if available (the small floating error display).
 -- -----------------------------------------------------------------------------
 function funk_debug.error(message, ...)
-    local text = fmt(tostring(message), ...)
+    local text = fmt(tostring(message), unpack(arg))
     _printLine(_colorize("red", "[ERROR] ") .. _colorize("white", text))
     if UIErrorsFrame then
         UIErrorsFrame:AddMessage(text, 1, 0.2, 0.2, 1)
@@ -190,7 +190,7 @@ end
 -- Prints a warning in orange/yellow.  Similar to console.warn().
 -- -----------------------------------------------------------------------------
 function funk_debug.warn(message, ...)
-    local text = fmt(tostring(message), ...)
+    local text = fmt(tostring(message), unpack(arg))
     _printLine(_colorize("orange", "[WARN] ") .. _colorize("yellow", text))
 end
 
@@ -199,7 +199,7 @@ end
 -- Prints an informational message in cyan/green.  Similar to console.info().
 -- -----------------------------------------------------------------------------
 function funk_debug.info(message, ...)
-    local text = fmt(tostring(message), ...)
+    local text = fmt(tostring(message), unpack(arg))
     _printLine(_colorize("cyan", "[INFO] ") .. _colorize("green", text))
 end
 
@@ -216,7 +216,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk_debug.whisper(target, message, ...)
     if SendChatMessage then
-        local text = fmt(tostring(message), ...)
+        local text = fmt(tostring(message), unpack(arg))
         SendChatMessage("[funk] " .. text, "WHISPER", nil, target)
     else
         -- Not in WoW — fall back to log
@@ -231,7 +231,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk_debug.say(message, ...)
     if SendChatMessage then
-        local text = fmt(tostring(message), ...)
+        local text = fmt(tostring(message), unpack(arg))
         SendChatMessage("[funk] " .. text, "SAY")
     else
         funk_debug.log("say", message)
@@ -249,7 +249,7 @@ function funk_debug.assert(condition, message, ...)
     if condition then
         return true
     end
-    local text = message and fmt(tostring(message), ...) or "assertion failed"
+    local text = message and fmt(tostring(message), unpack(arg)) or "assertion failed"
     funk_debug.error("ASSERT FAILED: " .. text)
     return false
 end
