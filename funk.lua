@@ -48,23 +48,24 @@ local funk = {}
 -- Internal helpers
 -- ---------------------------------------------------------------------------
 
--- _iter: returns a coroutine-based iterator over a plain table *or* passes
+-- _iter: returns a closure-based iterator over a plain table *or* passes
 -- through an already-callable iterator function.
 -- In JS terms: converts an Array or Iterable into an iterator.
+-- NOTE: uses a simple closure instead of coroutine.wrap because the
+-- coroutine library is not available in the WoW 1.12 Lua sandbox.
 local function _iter(list_or_iter)
     if type(list_or_iter) == "function" then
         return list_or_iter
     end
     if list_or_iter == nil then
-        return coroutine.wrap(function() end)
+        return function() return nil end
     end
-    -- Wrap the array in a coroutine so all collection functions share one
-    -- iteration path.  Lua coroutines are roughly analogous to JS generators.
-    return coroutine.wrap(function()
-        for i = 1, table.getn(list_or_iter) do
-            coroutine.yield(list_or_iter[i])
-        end
-    end)
+    local i = 0
+    local n = table.getn(list_or_iter)
+    return function()
+        i = i + 1
+        if i <= n then return list_or_iter[i] end
+    end
 end
 
 -- _identity: returns its argument unchanged (lodash _.identity / ramda R.identity).

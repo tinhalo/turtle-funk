@@ -303,9 +303,9 @@ local function create_ui()
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", frame.StartMoving)
-  frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-  frame:SetScript("OnMouseUp", frame.StopMovingOrSizing)
+  frame:SetScript("OnDragStart", function() frame:StartMoving() end)
+  frame:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+  frame:SetScript("OnMouseUp", function() frame:StopMovingOrSizing() end)
   frame:SetScript("OnShow", update_page)
   frame:Hide()  -- Start hidden
 
