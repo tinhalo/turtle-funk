@@ -33,7 +33,7 @@
 --   local F = dofile("funk.lua")  -- return value is the funk table
 --
 --   F.map({1,2,3}, function(x) return x * 2 end)  --> {2, 4, 6}
---   F.filter({1,2,3,4}, function(x) return x % 2 == 0 end)  --> {2, 4}
+--   F.filter({1,2,3,4}, function(x) return math.mod(x, 2) == 0 end)  --> {2, 4}
 --   F.reduce({1,2,3,4}, 0, function(acc, x) return acc + x end)  --> 10
 -- =============================================================================
 
@@ -1535,7 +1535,8 @@ end
 -- Lua has no built-in trim; uses pattern matching.
 -- -----------------------------------------------------------------------------
 function funk.trim(str)
-    return str:match("^%s*(.-)%s*$")
+    local _, _, result = string.find(str, "^%s*(.-)%s*$")
+    return result
 end
 
 -- -----------------------------------------------------------------------------
@@ -1543,11 +1544,13 @@ end
 -- lodash: _.trimStart / _.trimEnd   JS: str.trimStart() / str.trimEnd()
 -- -----------------------------------------------------------------------------
 function funk.trimStart(str)
-    return str:match("^%s*(.*)")
+    local _, _, result = string.find(str, "^%s*(.*)")
+    return result
 end
 
 function funk.trimEnd(str)
-    return str:match("(.-)%s*$")
+    local _, _, result = string.find(str, "(.-)%s*$")
+    return result
 end
 
 -- -----------------------------------------------------------------------------

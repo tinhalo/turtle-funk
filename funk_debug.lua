@@ -121,7 +121,7 @@ local function _serialize(value, indent, depth, maxDepth)
             -- Print as a JS-style object: { key: value, ... }
             for k, v in pairs(value) do
                 local keyStr = type(k) == "string"
-                    and (k:match("^[%a_][%w_]*$") and k or ('"' .. k .. '"'))
+                    and (string.find(k, "^[%a_][%w_]*$") and k or ('"' .. k .. '"'))
                     or ("[" .. tostring(k) .. "]")
                 parts[table.getn(parts) + 1] = childIndent .. keyStr .. ": "
                     .. _serialize(v, childIndent, depth + 1, maxDepth)
