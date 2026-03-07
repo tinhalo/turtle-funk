@@ -43,7 +43,7 @@ local demo_fns = {
   end,
   filter = function()
     local input = samples.nums
-    local res = F.filter(input, function(x) return x % 2 == 0 end)
+    local res = F.filter(input, function(x) return math.mod(x, 2) == 0 end)
     D.log("filter even", {input=input, output=res})
   end,
   reduce = function()
@@ -58,7 +58,7 @@ local demo_fns = {
   end,
   groupBy = function()
     local input = samples.nums
-    local res = F.groupBy(input, function(x) return x % 2 == 0 and "even" or "odd" end)
+    local res = F.groupBy(input, function(x) return math.mod(x, 2) == 0 and "even" or "odd" end)
     D.log("groupBy parity", res)
   end,
   pluck = function()
@@ -83,12 +83,12 @@ local demo_fns = {
   end,
   partition = function()
     local input = samples.nums
-    local res = F.partition(input, function(x) return x % 2 == 0 end)
+    local res = F.partition(input, function(x) return math.mod(x, 2) == 0 end)
     D.log("partition even", res)
   end,
   countBy = function()
     local input = samples.nums
-    local res = F.countBy(input, function(x) return x % 2 end)
+    local res = F.countBy(input, function(x) return math.mod(x, 2) end)
     D.log("countBy %2", res)
   end,
   flatten = function()
@@ -225,7 +225,7 @@ local demo_fns = {
   chain = function()
     local input = samples.nums
     local res = F.chain(input)
-      :filter(function(x) return x % 2 == 0 end)
+      :filter(function(x) return math.mod(x, 2) == 0 end)
       :map(function(x) return x * 10 end)
       :sort()
       :value()
@@ -254,7 +254,7 @@ local func_list = {
 
 local frame, page, slots, prev_btn, next_btn, pageText
 local funcs_per_page = 12
-local total_pages = math.ceil(#func_list / funcs_per_page)
+local total_pages = math.ceil(table.getn(func_list) / funcs_per_page)
 
 local function run_demo(name)
   local fn = demo_fns[name]
@@ -280,7 +280,7 @@ local function update_page()
   end
   pageText:SetText(format("Page %d / %d", page, total_pages))
   prev_btn:SetEnabled(page > 1)
-  next_btn:SetEnabled(start_idx + funcs_per_page - 1 < #func_list)
+  next_btn:SetEnabled(start_idx + funcs_per_page - 1 < table.getn(func_list))
 end
 
 local function create_ui()
@@ -313,7 +313,7 @@ local function create_ui()
     btn:SetSize(220, 28)
     btn:SetFrameLevel(frame:GetFrameLevel() + 10)
     local row = math.ceil(i / 2)
-    local col_offset = ((i % 2 == 0) and 255 or 15)
+    local col_offset = ((math.mod(i, 2) == 0) and 255 or 15)
     btn:SetPoint("TOPLEFT", frame, col_offset, -65 - (row - 1) * 32)
     btn:SetNormalFontObject("GameFontNormalSmall")
     btn:SetText("Button " .. i)

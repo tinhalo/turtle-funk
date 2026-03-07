@@ -30,13 +30,13 @@ local function _str(v)
     if type(v) == "table" then
         local parts = {}
         -- Try as array first
-        local isArr = (#v > 0)
+        local isArr = (table.getn(v) > 0)
         if isArr then
             for i, val in ipairs(v) do parts[i] = _str(val) end
             return "{" .. table.concat(parts, ", ") .. "}"
         else
             for k, val in pairs(v) do
-                parts[#parts + 1] = tostring(k) .. "=" .. _str(val)
+                parts[table.getn(parts) + 1] = tostring(k) .. "=" .. _str(val)
             end
             return "{" .. table.concat(parts, ", ") .. "}"
         end
@@ -76,7 +76,7 @@ local function _fail(desc, expected, got, note)
     end
     if note then msg = msg .. "  |cFFFF8C00" .. note .. "|r" end
     _out(msg)
-    _results.errors[#_results.errors + 1] = desc
+    _results.errors[table.getn(_results.errors) + 1] = desc
 end
 
 -- Deep-equality helper for assertions (re-uses funk.isEqual when available).
@@ -133,7 +133,7 @@ local F = funk_test.expectFalse
 -- ── each ────────────────────────────────────────────────────────────────────
 local function test_each()
     local acc = {}
-    funk.each({10, 20, 30}, function(v) acc[#acc+1] = v end)
+    funk.each({10, 20, 30}, function(v) acc[table.getn(acc)+1] = v end)
     E("each: collects all values",    acc, {10, 20, 30})
     E("each: returns original list",  funk.each({1}, function() end), {1})
 end
@@ -222,7 +222,7 @@ end
 -- ── groupBy ──────────────────────────────────────────────────────────────────
 local function test_groupBy()
     local result = funk.groupBy({1,2,3,4,5,6}, function(x)
-        return x % 2 == 0 and "even" or "odd"
+        return math.mod(x, 2) == 0 and "even" or "odd"
     end)
     E("groupBy: odds",  result["odd"],  {1,3,5})
     E("groupBy: evens", result["even"], {2,4,6})
@@ -231,7 +231,7 @@ end
 -- ── countBy ──────────────────────────────────────────────────────────────────
 local function test_countBy()
     local result = funk.countBy({1,2,3,4,5}, function(x)
-        return x % 2 == 0 and "even" or "odd"
+        return math.mod(x, 2) == 0 and "even" or "odd"
     end)
     E("countBy: odd count",  result["odd"],  3)
     E("countBy: even count", result["even"], 2)
@@ -239,7 +239,7 @@ end
 
 -- ── partition ────────────────────────────────────────────────────────────────
 local function test_partition()
-    local parts = funk.partition({1,2,3,4,5}, function(x) return x%2==0 end)
+    local parts = funk.partition({1,2,3,4,5}, function(x) return math.mod(x,2)==0 end)
     E("partition: evens", parts[1], {2,4})
     E("partition: odds",  parts[2], {1,3,5})
 end
@@ -494,7 +494,7 @@ local function test_func_utils()
     local sub = function(a, b) return a - b end
     E("flip: args swapped", funk.flip(sub)(1, 10), 9)  -- sub(10,1)
 
-    local isEven = function(x) return x % 2 == 0 end
+    local isEven = function(x) return math.mod(x, 2) == 0 end
     local isOdd  = funk.negate(isEven)
     T("negate: odd", isOdd(3))
     F("negate: even", isOdd(4))
@@ -696,7 +696,7 @@ function funk_test.run()
         "Results: %d / %d passed  (%d failed)|r",
         _results.passed, total, _results.failed
     ))
-    if #_results.errors > 0 then
+    if table.getn(_results.errors) > 0 then
         _out("|cFFFF4444Failed tests:|r")
         for _, name in ipairs(_results.errors) do
             _out("  |cFFFF4444• " .. name .. "|r")
