@@ -614,6 +614,38 @@ local function test_no_global_pollution()
         rawget(_G, "funk_test"))
 end
 
+-- ── nil safety ──────────────────────────────────────────────────────────────
+local N = funk_test.expectNil
+
+local function test_nil_safety()
+    -- _iter: nil list should produce empty results for collection functions
+    E("map: nil list",       funk.map(nil, function(x) return x end),    {})
+    E("filter: nil list",    funk.filter(nil, function() return true end), {})
+    E("each: nil list",      (function() funk.each(nil, function() end) return true end)(), true)
+
+    -- pluck: nil elements in list should not crash
+    T("pluck: nil in list doesn't crash",
+        type(funk.pluck({{name="A"}, nil, {name="C"}}, "name")) == "table")
+
+    -- String functions: nil input
+    N("trim: nil",       funk.trim(nil))
+    N("trimStart: nil",  funk.trimStart(nil))
+    N("trimEnd: nil",    funk.trimEnd(nil))
+    N("capitalize: nil", funk.capitalize(nil))
+    N("upperCase: nil",  funk.upperCase(nil))
+    N("lowerCase: nil",  funk.lowerCase(nil))
+    N("repeat: nil",     funk["repeat"](nil, 3))
+    N("pad: nil",        funk.pad(nil, 5))
+    N("padStart: nil",   funk.padStart(nil, 5))
+    N("padEnd: nil",     funk.padEnd(nil, 5))
+    E("split: nil str",  funk.split(nil, ","),  {})
+    E("split: nil sep",  funk.split("abc", nil), {"abc"})
+    F("startsWith: nil str", funk.startsWith(nil, "x"))
+    F("endsWith: nil str",   funk.endsWith(nil, "x"))
+    F("startsWith: nil prefix", funk.startsWith("hello", nil))
+    F("endsWith: nil suffix",   funk.endsWith("hello", nil))
+end
+
 -- ---------------------------------------------------------------------------
 -- Run all test suites
 -- ---------------------------------------------------------------------------
@@ -669,6 +701,7 @@ local _SUITES = {
     {"chaining",            test_chaining},
     {"mixin",               test_mixin},
     {"no global pollution", test_no_global_pollution},
+    {"nil safety",          test_nil_safety},
 }
 
 -- -----------------------------------------------------------------------------
