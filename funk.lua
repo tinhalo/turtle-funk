@@ -55,6 +55,9 @@ local function _iter(list_or_iter)
     if type(list_or_iter) == "function" then
         return list_or_iter
     end
+    if list_or_iter == nil then
+        return coroutine.wrap(function() end)
+    end
     -- Wrap the array in a coroutine so all collection functions share one
     -- iteration path.  Lua coroutines are roughly analogous to JS generators.
     return coroutine.wrap(function()
@@ -318,7 +321,10 @@ funk.contains = funk.includes
 -- Extracts a named property from every element in the list.
 -- -----------------------------------------------------------------------------
 function funk.pluck(list, key)
-    return funk.map(list, function(v) return v[key] end)
+    return funk.map(list, function(v)
+        if v == nil then return nil end
+        return v[key]
+    end)
 end
 
 -- -----------------------------------------------------------------------------
@@ -332,7 +338,9 @@ end
 function funk.invoke(list, methodName, ...)
     local args = arg
     funk.each(list, function(obj)
-        obj[methodName](obj, unpack(args))
+        if obj ~= nil and obj[methodName] ~= nil then
+            obj[methodName](obj, unpack(args))
+        end
     end)
     return list
 end
@@ -348,7 +356,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.groupBy(list, iteratee)
     local fn = type(iteratee) == "function" and iteratee
-               or function(v) return v[iteratee] end
+               or function(v) if v == nil then return nil end return v[iteratee] end
     local result = {}
     for v in _iter(list) do
         local k = fn(v)
@@ -367,7 +375,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.countBy(list, iteratee)
     local fn = type(iteratee) == "function" and iteratee
-               or function(v) return v[iteratee] end
+               or function(v) if v == nil then return nil end return v[iteratee] end
     local result = {}
     for v in _iter(list) do
         local k = fn(v)
@@ -407,7 +415,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.sortBy(list, iteratee)
     local fn = type(iteratee) == "function" and iteratee
-               or function(v) return v[iteratee] end
+               or function(v) if v == nil then return nil end return v[iteratee] end
     local arr = {}
     for v in _iter(list) do arr[table.getn(arr) + 1] = v end
     table.sort(arr, function(a, b) return fn(a) < fn(b) end)
@@ -1542,6 +1550,7 @@ end
 -- Lua has no built-in trim; uses pattern matching.
 -- -----------------------------------------------------------------------------
 function funk.trim(str)
+    if str == nil then return nil end
     local _, _, result = string.find(str, "^%s*(.-)%s*$")
     return result
 end
@@ -1551,11 +1560,13 @@ end
 -- lodash: _.trimStart / _.trimEnd   JS: str.trimStart() / str.trimEnd()
 -- -----------------------------------------------------------------------------
 function funk.trimStart(str)
+    if str == nil then return nil end
     local _, _, result = string.find(str, "^%s*(.*)")
     return result
 end
 
 function funk.trimEnd(str)
+    if str == nil then return nil end
     local _, _, result = string.find(str, "(.-)%s*$")
     return result
 end
@@ -1568,6 +1579,8 @@ end
 -- Returns an array of strings.
 -- -----------------------------------------------------------------------------
 function funk.split(str, sep, max)
+    if str == nil then return {} end
+    if sep == nil then return {str} end
     local result, pattern = {}, "([^" .. sep .. "]*)" .. sep .. "?"
     local count = 0
     str:gsub(pattern, function(c)
@@ -1587,6 +1600,7 @@ end
 -- lodash: _.startsWith   JS: str.startsWith(prefix)
 -- -----------------------------------------------------------------------------
 function funk.startsWith(str, prefix)
+    if str == nil or prefix == nil then return false end
     return str:sub(1, string.len(prefix)) == prefix
 end
 
@@ -1595,6 +1609,7 @@ end
 -- lodash: _.endsWith   JS: str.endsWith(suffix)
 -- -----------------------------------------------------------------------------
 function funk.endsWith(str, suffix)
+    if str == nil or suffix == nil then return false end
     return suffix == "" or str:sub(-string.len(suffix)) == suffix
 end
 
@@ -1603,6 +1618,7 @@ end
 -- lodash: _.capitalize   JS: str[0].toUpperCase() + str.slice(1).toLowerCase()
 -- -----------------------------------------------------------------------------
 function funk.capitalize(str)
+    if str == nil then return nil end
     return str:sub(1, 1):upper() .. str:sub(2):lower()
 end
 
@@ -1610,8 +1626,8 @@ end
 -- funk.upperCase(str) / funk.lowerCase(str)
 -- lodash: _.toUpper / _.toLower   JS: str.toUpperCase() / str.toLowerCase()
 -- -----------------------------------------------------------------------------
-function funk.upperCase(str) return str:upper() end
-function funk.lowerCase(str) return str:lower() end
+function funk.upperCase(str) if str == nil then return nil end return str:upper() end
+function funk.lowerCase(str) if str == nil then return nil end return str:lower() end
 
 -- -----------------------------------------------------------------------------
 -- funk.repeat(str, n)
@@ -1619,6 +1635,7 @@ function funk.lowerCase(str) return str:lower() end
 -- `repeat` is a reserved word in Lua; use funk["repeat"](str, n).
 -- -----------------------------------------------------------------------------
 funk["repeat"] = function(str, n)
+    if str == nil then return nil end
     local result = {}
     for i = 1, n do result[i] = str end
     return table.concat(result)
@@ -1630,6 +1647,7 @@ end
 -- Centers the string within `length`, padded with `chars` (default " ").
 -- -----------------------------------------------------------------------------
 function funk.pad(str, length, chars)
+    if str == nil then return nil end
     chars = chars or " "
     local diff = length - string.len(str)
     if diff <= 0 then return str end
@@ -1639,6 +1657,7 @@ function funk.pad(str, length, chars)
 end
 
 function funk.padStart(str, length, chars)
+    if str == nil then return nil end
     chars = chars or " "
     local diff = length - string.len(str)
     if diff <= 0 then return str end
@@ -1646,6 +1665,7 @@ function funk.padStart(str, length, chars)
 end
 
 function funk.padEnd(str, length, chars)
+    if str == nil then return nil end
     chars = chars or " "
     local diff = length - string.len(str)
     if diff <= 0 then return str end
