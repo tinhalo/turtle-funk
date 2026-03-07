@@ -1395,7 +1395,8 @@ funk.partial = funk.curry
 -- -----------------------------------------------------------------------------
 function funk.flip(fn)
     return function(a, b, ...)
-        return fn(b, a, ...)
+        local rest = arg
+        return fn(b, a, unpack(rest))
     end
 end
 
@@ -1406,7 +1407,8 @@ end
 -- -----------------------------------------------------------------------------
 function funk.negate(predicate)
     return function(...)
-        return not predicate(...)
+        local args = arg
+        return not predicate(unpack(args))
     end
 end
 funk.complement = funk.negate
@@ -1422,9 +1424,10 @@ funk.complement = funk.negate
 function funk.once(fn)
     local called, result = false, nil
     return function(...)
+        local args = arg
         if not called then
             called = true
-            result = fn(...)
+            result = fn(unpack(args))
         end
         return result
     end
@@ -1444,14 +1447,15 @@ end
 function funk.memoize(fn, resolver)
     local cache = {}
     return function(...)
+        local args = arg
         local key
         if resolver then
-            key = resolver(...)
+            key = resolver(unpack(args))
         else
-            key = (...)  -- first argument only by default
+            key = args[1]  -- first argument only by default
         end
         if cache[key] == nil then
-            cache[key] = fn(...)
+            cache[key] = fn(unpack(args))
         end
         return cache[key]
     end
@@ -1467,7 +1471,8 @@ end
 -- -----------------------------------------------------------------------------
 function funk.wrap(fn, wrapper)
     return function(...)
-        return wrapper(fn, ...)
+        local args = arg
+        return wrapper(fn, unpack(args))
     end
 end
 
@@ -1482,9 +1487,10 @@ end
 function funk.after(n, fn)
     local count = 0
     return function(...)
+        local args = arg
         count = count + 1
         if count >= n then
-            return fn(...)
+            return fn(unpack(args))
         end
     end
 end
@@ -1498,9 +1504,10 @@ end
 function funk.before(n, fn)
     local count, result = 0, nil
     return function(...)
+        local args = arg
         count = count + 1
         if count < n then
-            result = fn(...)
+            result = fn(unpack(args))
         end
         return result
     end
@@ -1755,7 +1762,8 @@ end
 -- The first argument (list/obj) is replaced with the wrapped value.
 local function _attachChainMethod(name, fn)
     Chain[name] = function(self, ...)
-        self._val = fn(self._val, ...)
+        local args = arg
+        self._val = fn(self._val, unpack(args))
         return self
     end
 end
