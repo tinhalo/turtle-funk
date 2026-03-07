@@ -342,7 +342,7 @@ local function create_ui()
     local col_offset = ((math.mod(i, 2) == 0) and 255 or 15)
     btn:SetPoint("TOPLEFT", frame, "TOPLEFT", col_offset, -65 - (row - 1) * 32)
     if btn.SetNormalFontObject then
-      btn:SetNormalFontObject(GameFontNormalSmall)
+      btn:SetNormalFontObject("GameFontNormalSmall")
     end
     btn:SetText("Button " .. i)
     slots[i] = btn

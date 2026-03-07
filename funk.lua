@@ -1626,8 +1626,14 @@ end
 -- funk.upperCase(str) / funk.lowerCase(str)
 -- lodash: _.toUpper / _.toLower   JS: str.toUpperCase() / str.toLowerCase()
 -- -----------------------------------------------------------------------------
-function funk.upperCase(str) if str == nil then return nil end return str:upper() end
-function funk.lowerCase(str) if str == nil then return nil end return str:lower() end
+function funk.upperCase(str)
+    if str == nil then return nil end
+    return str:upper()
+end
+function funk.lowerCase(str)
+    if str == nil then return nil end
+    return str:lower()
+end
 
 -- -----------------------------------------------------------------------------
 -- funk.repeat(str, n)
