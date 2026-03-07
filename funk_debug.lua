@@ -19,10 +19,11 @@
 --   D.error("Something broke!")   -- red text in chat frame
 -- =============================================================================
 
--- WoW .toc loader provides (addonName, addonTable) as varargs.
--- _ns is the per-addon namespace table populated by earlier .toc files.
--- When loaded via dofile() both are nil.
-local _addonName, _ns = ...
+-- WoW 1.12 / Lua 5.0: the per-addon namespace is a single shared global table.
+-- Each file in the addon accesses it via this global instead of _G directly.
+-- When loaded via dofile() standalone the table is still created here.
+FunkDemo = FunkDemo or {}
+local _ns = FunkDemo
 
 -- Grab the funk library: prefer the namespace, fall back to the global (if the
 -- caller set one deliberately), and finally use an empty stub.

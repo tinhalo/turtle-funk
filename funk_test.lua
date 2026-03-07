@@ -16,8 +16,11 @@
 --   Results: 42 passed, 1 failed
 -- =============================================================================
 
--- WoW .toc loader provides (addonName, addonTable) as varargs.
-local _addonName, _ns = ...
+-- WoW 1.12 / Lua 5.0: the per-addon namespace is a single shared global table.
+-- Each file in the addon accesses it via this global instead of _G directly.
+-- When loaded via dofile() standalone the table is still created here.
+FunkDemo = FunkDemo or {}
+local _ns = FunkDemo
 
 -- Resolve dependencies: WoW namespace first, then dofile for CLI/standalone.
 local funk       = (_ns and _ns.funk)       or (dofile and dofile("funk.lua"))       or {}

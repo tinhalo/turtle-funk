@@ -11,7 +11,7 @@
 -- frame via funk_debug.log.  Results are paginated (12 per page).
 -- =============================================================================
 
-local _, ns = ...
+local ns = FunkDemo
 local F = ns.funk
 local D = ns.funk_debug
 
