@@ -173,14 +173,14 @@ end
 
 -- ── filter ──────────────────────────────────────────────────────────────────
 local function test_filter()
-    E("filter: evens",  funk.filter({1,2,3,4,5}, function(x) return x%2==0 end), {2,4})
+    E("filter: evens",  funk.filter({1,2,3,4,5}, function(x) return math.mod(x,2)==0 end), {2,4})
     E("filter: empty",  funk.filter({}, function() return true end), {})
     E("select alias",   funk.select({1,2,3}, function(x) return x>1 end), {2,3})
 end
 
 -- ── reject ──────────────────────────────────────────────────────────────────
 local function test_reject()
-    E("reject: odds",   funk.reject({1,2,3,4,5}, function(x) return x%2==0 end), {1,3,5})
+    E("reject: odds",   funk.reject({1,2,3,4,5}, function(x) return math.mod(x,2)==0 end), {1,3,5})
 end
 
 -- ── find ────────────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ local function test_every_some()
     T("some: at least one",       funk.some({1,2,3}, function(x) return x>2 end))
     F("some: none match",         funk.some({1,2,3}, function(x) return x>9 end))
     F("some: empty list",         funk.some({}))
-    T("all alias",                funk.all({2,4,6}, function(x) return x%2==0 end))
+    T("all alias",                funk.all({2,4,6}, function(x) return math.mod(x,2)==0 end))
     T("any alias",                funk.any({1,3,5}, function(x) return x==3 end))
 end
 
