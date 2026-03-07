@@ -279,16 +279,25 @@ local function update_page()
     end
   end
   pageText:SetText(format("Page %d / %d", page, total_pages))
-  prev_btn:SetEnabled(page > 1)
-  next_btn:SetEnabled(start_idx + funcs_per_page - 1 < table.getn(func_list))
+  if page > 1 then
+    prev_btn:Enable()
+  else
+    prev_btn:Disable()
+  end
+  if start_idx + funcs_per_page - 1 < table.getn(func_list) then
+    next_btn:Enable()
+  else
+    next_btn:Disable()
+  end
 end
 
 local function create_ui()
   if FunkDemoFrame then return end
 
   frame = CreateFrame("Frame", "FunkDemoFrame", UIParent, "BasicFrame")
-  frame:SetSize(480, 520)
-  frame:SetPoint("CENTER", UIParent, 0, 0)
+  frame:SetWidth(480)
+  frame:SetHeight(520)
+  frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
@@ -310,11 +319,12 @@ local function create_ui()
   slots = {}
   for i = 1, funcs_per_page do
     local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    btn:SetSize(220, 28)
+    btn:SetWidth(220)
+    btn:SetHeight(28)
     btn:SetFrameLevel(frame:GetFrameLevel() + 10)
     local row = math.ceil(i / 2)
     local col_offset = ((math.mod(i, 2) == 0) and 255 or 15)
-    btn:SetPoint("TOPLEFT", frame, col_offset, -65 - (row - 1) * 32)
+    btn:SetPoint("TOPLEFT", frame, "TOPLEFT", col_offset, -65 - (row - 1) * 32)
     btn:SetNormalFontObject("GameFontNormalSmall")
     btn:SetText("Button " .. i)
     slots[i] = btn
@@ -322,7 +332,8 @@ local function create_ui()
 
   -- Prev/Next
   prev_btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-  prev_btn:SetSize(80, 25)
+  prev_btn:SetWidth(80)
+  prev_btn:SetHeight(25)
   prev_btn:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 25, 15)
   prev_btn:SetText("Previous")
   prev_btn:SetScript("OnClick", function()
@@ -332,7 +343,8 @@ local function create_ui()
   prev_btn:Disable()
 
   next_btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-  next_btn:SetSize(80, 25)
+  next_btn:SetWidth(80)
+  next_btn:SetHeight(25)
   next_btn:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -25, 15)
   next_btn:SetText("Next")
   next_btn:SetScript("OnClick", function()
