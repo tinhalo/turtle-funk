@@ -18,7 +18,9 @@ local D = ns.funk_debug
 -- Slash command
 SLASH_FUNKDEMO1 = "/funkdemo"
 SlashCmdList["FUNKDEMO"] = function()
-  FunkDemoFrame:Show()
+  if FunkDemoFrame then
+    FunkDemoFrame:Show()
+  end
 end
 
 -- Sample data for demos
@@ -358,9 +360,9 @@ end
 -- Init on load
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("ADDON_LOADED")
-loader:SetScript("OnEvent", function(self, event, addon)
-  if addon == "FunkDemo" then
+loader:SetScript("OnEvent", function()
+  if arg1 == "FunkDemo" then
     create_ui()
-    self:UnregisterEvent("ADDON_LOADED")
+    this:UnregisterEvent("ADDON_LOADED")
   end
 end)
