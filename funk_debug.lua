@@ -22,7 +22,7 @@
 -- WoW .toc loader provides (addonName, addonTable) as varargs.
 -- _ns is the per-addon namespace table populated by earlier .toc files.
 -- When loaded via dofile() both are nil.
-local _addonName, _ns = arg[1], arg[2]
+local _addonName, _ns = ...
 
 -- Grab the funk library: prefer the namespace, fall back to the global (if the
 -- caller set one deliberately), and finally use an empty stub.

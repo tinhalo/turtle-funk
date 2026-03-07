@@ -17,7 +17,7 @@
 -- =============================================================================
 
 -- WoW .toc loader provides (addonName, addonTable) as varargs.
-local _addonName, _ns = arg[1], arg[2]
+local _addonName, _ns = ...
 
 -- Resolve dependencies: WoW namespace first, then dofile for CLI/standalone.
 local funk       = (_ns and _ns.funk)       or (dofile and dofile("funk.lua"))       or {}
