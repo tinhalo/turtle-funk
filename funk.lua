@@ -25,9 +25,8 @@
 -- │ Ternary              │ cond ? a : b            │ cond and a or b          │
 -- └──────────────────────────────────────────────────────────────────────────┘
 --
--- USAGE (WoW .toc addon — no global pollution):
---   local _, ns = ...           -- WoW passes (addonName, addonTable) to every file
---   local F = ns.funk           -- populated by funk.lua when loaded earlier in .toc
+-- USAGE (WoW 1.12 / Lua 5.0 .toc addon):
+--   local F = FunkDemo.funk     -- populated by funk.lua when loaded earlier in .toc
 --
 -- USAGE (standalone / dofile):
 --   local F = dofile("funk.lua")  -- return value is the funk table
@@ -37,10 +36,11 @@
 --   F.reduce({1,2,3,4}, 0, function(acc, x) return acc + x end)  --> 10
 -- =============================================================================
 
--- WoW's .toc loader passes (addonName, addonTable) as varargs to every file.
--- Capturing them here lets us share values via the per-addon namespace table
--- instead of writing to _G.  When loaded via dofile() both will be nil.
-local _addonName, _ns = arg[1], arg[2]
+-- WoW 1.12 / Lua 5.0: declare the per-addon namespace as a single global table.
+-- Every file in the addon reads/writes this same table instead of _G directly.
+-- When loaded via dofile() standalone the table is still created here.
+FunkDemo = FunkDemo or {}
+local _ns = FunkDemo
 
 local funk = {}
 
@@ -1814,12 +1814,10 @@ for name, fn in pairs(funk) do
     end
 end
 
--- Share via the WoW per-addon namespace table when available.
--- This avoids adding anything to _G and keeps the global environment clean.
--- In WoW: every .toc file receives (addonName, addonTable) as ..., so _ns is
---         the shared addon table.  Other files in the same addon access the
---         library via `local _, ns = ...` then `local F = ns.funk`.
--- Standalone (dofile/require): _ns is nil; use the return value instead.
+-- Share via the WoW per-addon namespace table (the FunkDemo global).
+-- In WoW: _ns is the FunkDemo global table; other files access the library
+--         via `local F = FunkDemo.funk`.
+-- Standalone (dofile/require): _ns is the same table; use the return value instead.
 if _ns ~= nil then
     _ns.funk = funk
 end
