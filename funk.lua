@@ -330,7 +330,7 @@ end
 -- In Lua you must pass the object itself as first arg: obj:method(...)
 -- -----------------------------------------------------------------------------
 function funk.invoke(list, methodName, ...)
-    local args = {...}
+    local args = arg
     funk.each(list, function(obj)
         obj[methodName](obj, unpack(args))
     end)
@@ -688,7 +688,7 @@ funk.uniqBy  = funk.uniq
 -- -----------------------------------------------------------------------------
 function funk.without(array, ...)
     local excluded = {}
-    for _, v in ipairs({...}) do excluded[v] = true end
+    for _, v in ipairs(arg) do excluded[v] = true end
     return funk.filter(array, function(v) return not excluded[v] end)
 end
 
@@ -701,7 +701,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.union(...)
     local all = {}
-    for _, arr in ipairs({...}) do
+    for _, arr in ipairs(arg) do
         for _, v in ipairs(arr) do
             all[table.getn(all) + 1] = v
         end
@@ -717,7 +717,7 @@ end
 -- Returns elements present in ALL provided arrays.
 -- -----------------------------------------------------------------------------
 function funk.intersection(...)
-    local arrays = {...}
+    local arrays = arg
     if table.getn(arrays) == 0 then return {} end
     local base = arrays[1]
     local result = {}
@@ -743,7 +743,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.difference(array, ...)
     local others = {}
-    for _, arr in ipairs({...}) do
+    for _, arr in ipairs(arg) do
         for _, v in ipairs(arr) do others[v] = true end
     end
     return funk.filter(array, function(v) return not others[v] end)
@@ -758,7 +758,7 @@ end
 -- funk.zip({1,2,3}, {"a","b","c"}) → {{1,"a"}, {2,"b"}, {3,"c"}}
 -- -----------------------------------------------------------------------------
 function funk.zip(...)
-    local arrays = {...}
+    local arrays = arg
     local result = {}
     local len = 0
     for _, a in ipairs(arrays) do
@@ -918,7 +918,7 @@ function funk.splice(array, index, deleteCount, ...)
         if v == nil then break end
         removed[table.getn(removed) + 1] = v
     end
-    local insertItems = {...}
+    local insertItems = arg
     for i = table.getn(insertItems), 1, -1 do
         table.insert(array, index, insertItems[i])
     end
@@ -948,7 +948,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.concat(...)
     local result = {}
-    for _, arr in ipairs({...}) do
+    for _, arr in ipairs(arg) do
         if type(arr) == "table" then
             for _, v in ipairs(arr) do result[table.getn(result) + 1] = v end
         else
@@ -1041,7 +1041,7 @@ funk.fromPairs = funk.fromEntries
 -- Later sources overwrite earlier ones for duplicate keys.
 -- -----------------------------------------------------------------------------
 function funk.assign(destination, ...)
-    for _, source in ipairs({...}) do
+    for _, source in ipairs(arg) do
         for k, v in pairs(source) do
             destination[k] = v
         end
@@ -1059,7 +1059,7 @@ funk.extend = function(dest, src) return funk.assign(dest, src) end
 -- Array values are merged by index (not concatenated).
 -- -----------------------------------------------------------------------------
 function funk.merge(destination, ...)
-    for _, source in ipairs({...}) do
+    for _, source in ipairs(arg) do
         for k, v in pairs(source) do
             if type(v) == "table" and type(destination[k]) == "table" then
                 funk.merge(destination[k], v)
@@ -1080,7 +1080,7 @@ end
 -- Only sets a key if the destination does not already have a value for it.
 -- -----------------------------------------------------------------------------
 function funk.defaults(obj, ...)
-    for _, source in ipairs({...}) do
+    for _, source in ipairs(arg) do
         for k, v in pairs(source) do
             if obj[k] == nil then
                 obj[k] = v
@@ -1324,9 +1324,9 @@ end
 -- Note: ramda's compose is right-to-left; lodash's _.flow is left-to-right.
 -- -----------------------------------------------------------------------------
 function funk.compose(...)
-    local fns = {...}
+    local fns = arg
     return function(...)
-        local args = {...}
+        local args = arg
         local result
         for i = table.getn(fns), 1, -1 do
             if i == table.getn(fns) then
@@ -1349,9 +1349,9 @@ funk.flowRight = funk.compose
 -- pipe(f, g)(x) === g(f(x))
 -- -----------------------------------------------------------------------------
 function funk.pipe(...)
-    local fns = {...}
+    local fns = arg
     return function(...)
-        local args = {...}
+        local args = arg
         local result
         for i = 1, table.getn(fns) do
             if i == 1 then
@@ -1375,11 +1375,11 @@ funk.flow = funk.pipe
 -- True variadic currying is not practical in Lua 5.0 without reflection.
 -- -----------------------------------------------------------------------------
 function funk.curry(fn, ...)
-    local bound = {...}
+    local bound = arg
     return function(...)
         local args = {}
         for _, v in ipairs(bound) do args[table.getn(args) + 1] = v end
-        for _, v in ipairs({...})  do args[table.getn(args) + 1] = v end
+        for _, v in ipairs(arg)   do args[table.getn(args) + 1] = v end
         return fn(unpack(args))
     end
 end
