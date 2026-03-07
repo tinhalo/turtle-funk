@@ -104,18 +104,18 @@ local function _serialize(value, indent, depth, maxDepth)
             end
         end
         -- Also verify no gaps
-        if isArray and n ~= #value then isArray = false end
+        if isArray and n ~= table.getn(value) then isArray = false end
 
         local childIndent = indent .. "  "
         local parts = {}
 
         if isArray and n > 0 then
             -- Print as a JS-style array: [v1, v2, v3]
-            for i = 1, #value do
-                parts[#parts + 1] = childIndent
+            for i = 1, table.getn(value) do
+                parts[table.getn(parts) + 1] = childIndent
                     .. _serialize(value[i], childIndent, depth + 1, maxDepth)
             end
-            if #parts == 0 then return "[]" end
+            if table.getn(parts) == 0 then return "[]" end
             return "[\n" .. table.concat(parts, ",\n") .. "\n" .. indent .. "]"
         else
             -- Print as a JS-style object: { key: value, ... }
@@ -123,10 +123,10 @@ local function _serialize(value, indent, depth, maxDepth)
                 local keyStr = type(k) == "string"
                     and (k:match("^[%a_][%w_]*$") and k or ('"' .. k .. '"'))
                     or ("[" .. tostring(k) .. "]")
-                parts[#parts + 1] = childIndent .. keyStr .. ": "
+                parts[table.getn(parts) + 1] = childIndent .. keyStr .. ": "
                     .. _serialize(v, childIndent, depth + 1, maxDepth)
             end
-            if #parts == 0 then return "{}" end
+            if table.getn(parts) == 0 then return "{}" end
             return "{\n" .. table.concat(parts, ",\n") .. "\n" .. indent .. "}"
         end
     end

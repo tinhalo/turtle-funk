@@ -13,7 +13,7 @@
 -- │──────────────────────┼─────────────────────────┼──────────────────────── │
 -- │ Array index          │ 0-based  arr[0]         │ 1-based  arr[1]          │
 -- │ Undefined / null     │ undefined / null        │ nil                      │
--- │ Length               │ arr.length              │ #arr                     │
+-- │ Length               │ arr.length              │ table.getn(arr)          │
 -- │ String concat        │ "a" + "b"               │ "a" .. "b"               │
 -- │ Arrow func           │ (x) => x * 2            │ function(x) return x*2 end│
 -- │ Spread               │ fn(...args)             │ fn(unpack(args))         │
@@ -58,7 +58,7 @@ local function _iter(list_or_iter)
     -- Wrap the array in a coroutine so all collection functions share one
     -- iteration path.  Lua coroutines are roughly analogous to JS generators.
     return coroutine.wrap(function()
-        for i = 1, #list_or_iter do
+        for i = 1, table.getn(list_or_iter) do
             coroutine.yield(list_or_iter[i])
         end
     end)
@@ -77,7 +77,7 @@ local function _toarray(list)
     if type(list) == "table" then return list end
     local arr = {}
     for v in list do
-        arr[#arr + 1] = v
+        arr[table.getn(arr) + 1] = v
     end
     return arr
 end
@@ -116,7 +116,7 @@ funk.for_each = funk.each
 -- -----------------------------------------------------------------------------
 function funk.eachWithIndex(list, iteratee)
     local arr = _toarray(list)
-    for i = 1, #arr do
+    for i = 1, table.getn(arr) do
         iteratee(arr[i], i)
     end
     return arr
@@ -133,7 +133,7 @@ end
 function funk.map(list, iteratee)
     local result = {}
     for v in _iter(list) do
-        result[#result + 1] = iteratee(v)
+        result[table.getn(result) + 1] = iteratee(v)
     end
     return result
 end
@@ -147,7 +147,7 @@ funk.collect = funk.map
 function funk.mapWithIndex(list, iteratee)
     local arr = _toarray(list)
     local result = {}
-    for i = 1, #arr do
+    for i = 1, table.getn(arr) do
         result[i] = iteratee(arr[i], i)
     end
     return result
@@ -183,7 +183,7 @@ funk.inject = funk.reduce
 function funk.reduceRight(list, accumulator, iteratee)
     local arr  = _toarray(list)
     local memo = accumulator
-    for i = #arr, 1, -1 do
+    for i = table.getn(arr), 1, -1 do
         memo = iteratee(memo, arr[i])
     end
     return memo
@@ -203,7 +203,7 @@ function funk.filter(list, predicate)
     local result = {}
     for v in _iter(list) do
         if predicate(v) then
-            result[#result + 1] = v
+            result[table.getn(result) + 1] = v
         end
     end
     return result
@@ -221,7 +221,7 @@ function funk.reject(list, predicate)
     local result = {}
     for v in _iter(list) do
         if not predicate(v) then
-            result[#result + 1] = v
+            result[table.getn(result) + 1] = v
         end
     end
     return result
@@ -253,7 +253,7 @@ funk.detect = funk.find
 -- -----------------------------------------------------------------------------
 function funk.findIndex(list, predicate)
     local arr = _toarray(list)
-    for i = 1, #arr do
+    for i = 1, table.getn(arr) do
         if predicate(arr[i]) then return i end
     end
     return -1
@@ -353,7 +353,7 @@ function funk.groupBy(list, iteratee)
     for v in _iter(list) do
         local k = fn(v)
         if result[k] == nil then result[k] = {} end
-        result[k][#result[k] + 1] = v
+        result[k][table.getn(result[k]) + 1] = v
     end
     return result
 end
@@ -389,9 +389,9 @@ function funk.partition(list, predicate)
     local yes, no = {}, {}
     for v in _iter(list) do
         if predicate(v) then
-            yes[#yes + 1] = v
+            yes[table.getn(yes) + 1] = v
         else
-            no[#no + 1] = v
+            no[table.getn(no) + 1] = v
         end
     end
     return {yes, no}
@@ -409,7 +409,7 @@ function funk.sortBy(list, iteratee)
     local fn = type(iteratee) == "function" and iteratee
                or function(v) return v[iteratee] end
     local arr = {}
-    for v in _iter(list) do arr[#arr + 1] = v end
+    for v in _iter(list) do arr[table.getn(arr) + 1] = v end
     table.sort(arr, function(a, b) return fn(a) < fn(b) end)
     return arr
 end
@@ -425,7 +425,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.sort(list, comparator)
     local arr = {}
-    for v in _iter(list) do arr[#arr + 1] = v end
+    for v in _iter(list) do arr[table.getn(arr) + 1] = v end
     table.sort(arr, comparator)
     return arr
 end
@@ -477,8 +477,8 @@ end
 -- -----------------------------------------------------------------------------
 function funk.mean(list, iteratee)
     local arr = _toarray(list)
-    if #arr == 0 then return 0 end
-    return funk.sum(arr, iteratee) / #arr
+    if table.getn(arr) == 0 then return 0 end
+    return funk.sum(arr, iteratee) / table.getn(arr)
 end
 funk.average = funk.mean
 
@@ -502,7 +502,7 @@ function funk.first(array, n)
         return array[1]
     end
     local result = {}
-    local limit = math.min(n, #array)
+    local limit = math.min(n, table.getn(array))
     for i = 1, limit do
         result[i] = array[i]
     end
@@ -518,12 +518,12 @@ funk.take = funk.first
 -- -----------------------------------------------------------------------------
 function funk.last(array, n)
     if n == nil then
-        return array[#array]
+        return array[table.getn(array)]
     end
     local result = {}
-    local start  = math.max(1, #array - n + 1)
-    for i = start, #array do
-        result[#result + 1] = array[i]
+    local start  = math.max(1, table.getn(array) - n + 1)
+    for i = start, table.getn(array) do
+        result[table.getn(result) + 1] = array[i]
     end
     return result
 end
@@ -539,8 +539,8 @@ end
 function funk.rest(array, index)
     index = index or 2
     local result = {}
-    for i = index, #array do
-        result[#result + 1] = array[i]
+    for i = index, table.getn(array) do
+        result[table.getn(result) + 1] = array[i]
     end
     return result
 end
@@ -557,7 +557,7 @@ funk.drop = funk.rest
 function funk.initial(array, n)
     n = n or 1
     local result = {}
-    for i = 1, #array - n do
+    for i = 1, table.getn(array) - n do
         result[i] = array[i]
     end
     return result
@@ -573,9 +573,9 @@ end
 function funk.slice(array, startIndex, length)
     local result    = {}
     startIndex      = math.max(startIndex, 1)
-    local endIndex  = math.min(startIndex + length - 1, #array)
+    local endIndex  = math.min(startIndex + length - 1, table.getn(array))
     for i = startIndex, endIndex do
-        result[#result + 1] = array[i]
+        result[table.getn(result) + 1] = array[i]
     end
     return result
 end
@@ -590,12 +590,12 @@ end
 function funk.chunk(array, size)
     local result = {}
     local i = 1
-    while i <= #array do
+    while i <= table.getn(array) do
         local chunk = {}
-        for j = i, math.min(i + size - 1, #array) do
-            chunk[#chunk + 1] = array[j]
+        for j = i, math.min(i + size - 1, table.getn(array)) do
+            chunk[table.getn(chunk) + 1] = array[j]
         end
-        result[#result + 1] = chunk
+        result[table.getn(result) + 1] = chunk
         i = i + size
     end
     return result
@@ -615,10 +615,10 @@ function funk.flatten(array)
         if type(v) == "table" then
             local flat = funk.flatten(v)
             for _, fv in ipairs(flat) do
-                result[#result + 1] = fv
+                result[table.getn(result) + 1] = fv
             end
         else
-            result[#result + 1] = v
+            result[table.getn(result) + 1] = v
         end
     end
     return result
@@ -634,10 +634,10 @@ function funk.flattenShallow(array)
     for v in _iter(array) do
         if type(v) == "table" then
             for _, fv in ipairs(v) do
-                result[#result + 1] = fv
+                result[table.getn(result) + 1] = fv
             end
         else
-            result[#result + 1] = v
+            result[table.getn(result) + 1] = v
         end
     end
     return result
@@ -671,7 +671,7 @@ function funk.uniq(array, iteratee)
         local key = fn(v)
         if not seen[key] then
             seen[key] = true
-            result[#result + 1] = v
+            result[table.getn(result) + 1] = v
         end
     end
     return result
@@ -703,7 +703,7 @@ function funk.union(...)
     local all = {}
     for _, arr in ipairs({...}) do
         for _, v in ipairs(arr) do
-            all[#all + 1] = v
+            all[table.getn(all) + 1] = v
         end
     end
     return funk.uniq(all)
@@ -718,18 +718,18 @@ end
 -- -----------------------------------------------------------------------------
 function funk.intersection(...)
     local arrays = {...}
-    if #arrays == 0 then return {} end
+    if table.getn(arrays) == 0 then return {} end
     local base = arrays[1]
     local result = {}
     for _, v in ipairs(base) do
         local inAll = true
-        for i = 2, #arrays do
+        for i = 2, table.getn(arrays) do
             if not funk.includes(arrays[i], v) then
                 inAll = false
                 break
             end
         end
-        if inAll then result[#result + 1] = v end
+        if inAll then result[table.getn(result) + 1] = v end
     end
     return funk.uniq(result)
 end
@@ -762,12 +762,12 @@ function funk.zip(...)
     local result = {}
     local len = 0
     for _, a in ipairs(arrays) do
-        if #a > len then len = #a end
+        if table.getn(a) > len then len = table.getn(a) end
     end
     for i = 1, len do
         local row = {}
         for _, a in ipairs(arrays) do
-            row[#row + 1] = a[i]
+            row[table.getn(row) + 1] = a[i]
         end
         result[i] = row
     end
@@ -799,7 +799,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.indexOf(array, value, fromIndex)
     fromIndex = fromIndex or 1
-    for i = fromIndex, #array do
+    for i = fromIndex, table.getn(array) do
         if array[i] == value then return i end
     end
     return -1
@@ -811,7 +811,7 @@ end
 -- JS equivalent: arr.lastIndexOf(value)
 -- -----------------------------------------------------------------------------
 function funk.lastIndexOf(array, value)
-    for i = #array, 1, -1 do
+    for i = table.getn(array), 1, -1 do
         if array[i] == value then return i end
     end
     return -1
@@ -841,13 +841,13 @@ function funk.range(start, stop, step)
     if step > 0 then
         local i = start
         while i < stop do
-            result[#result + 1] = i
+            result[table.getn(result) + 1] = i
             i = i + step
         end
     elseif step < 0 then
         local i = start
         while i > stop do
-            result[#result + 1] = i
+            result[table.getn(result) + 1] = i
             i = i + step
         end
     end
@@ -864,8 +864,8 @@ end
 -- -----------------------------------------------------------------------------
 function funk.reverse(array)
     local result = {}
-    for i = #array, 1, -1 do
-        result[#result + 1] = array[i]
+    for i = table.getn(array), 1, -1 do
+        result[table.getn(result) + 1] = array[i]
     end
     return result
 end
@@ -916,10 +916,10 @@ function funk.splice(array, index, deleteCount, ...)
     for _ = 1, deleteCount or 0 do
         local v = table.remove(array, index)
         if v == nil then break end
-        removed[#removed + 1] = v
+        removed[table.getn(removed) + 1] = v
     end
     local insertItems = {...}
-    for i = #insertItems, 1, -1 do
+    for i = table.getn(insertItems), 1, -1 do
         table.insert(array, index, insertItems[i])
     end
     return removed
@@ -950,9 +950,9 @@ function funk.concat(...)
     local result = {}
     for _, arr in ipairs({...}) do
         if type(arr) == "table" then
-            for _, v in ipairs(arr) do result[#result + 1] = v end
+            for _, v in ipairs(arr) do result[table.getn(result) + 1] = v end
         else
-            result[#result + 1] = arr
+            result[table.getn(result) + 1] = arr
         end
     end
     return result
@@ -966,7 +966,7 @@ end
 function funk.toArray(listOrIter)
     if type(listOrIter) == "table" then
         local copy = {}
-        for _, v in ipairs(listOrIter) do copy[#copy + 1] = v end
+        for _, v in ipairs(listOrIter) do copy[table.getn(copy) + 1] = v end
         return copy
     end
     return _toarray(listOrIter)
@@ -989,13 +989,13 @@ end
 -- -----------------------------------------------------------------------------
 function funk.keys(obj)
     local result = {}
-    for k in pairs(obj) do result[#result + 1] = k end
+    for k in pairs(obj) do result[table.getn(result) + 1] = k end
     return result
 end
 
 function funk.values(obj)
     local result = {}
-    for _, v in pairs(obj) do result[#result + 1] = v end
+    for _, v in pairs(obj) do result[table.getn(result) + 1] = v end
     return result
 end
 
@@ -1010,7 +1010,7 @@ end
 function funk.entries(obj)
     local result = {}
     for k, v in pairs(obj) do
-        result[#result + 1] = {k, v}
+        result[table.getn(result) + 1] = {k, v}
     end
     return result
 end
@@ -1267,7 +1267,7 @@ end
 -- JS equivalent: obj.length  or  Object.keys(obj).length
 --
 -- Returns the number of elements/keys.
--- #array in Lua only works reliably for sequential integer-keyed tables.
+-- table.getn() in Lua only works reliably for sequential integer-keyed tables.
 -- This function handles both arrays and hash tables.
 -- -----------------------------------------------------------------------------
 function funk.size(obj)
@@ -1328,8 +1328,8 @@ function funk.compose(...)
     return function(...)
         local args = {...}
         local result
-        for i = #fns, 1, -1 do
-            if i == #fns then
+        for i = table.getn(fns), 1, -1 do
+            if i == table.getn(fns) then
                 result = fns[i](unpack(args))
             else
                 result = fns[i](result)
@@ -1353,7 +1353,7 @@ function funk.pipe(...)
     return function(...)
         local args = {...}
         local result
-        for i = 1, #fns do
+        for i = 1, table.getn(fns) do
             if i == 1 then
                 result = fns[i](unpack(args))
             else
@@ -1378,8 +1378,8 @@ function funk.curry(fn, ...)
     local bound = {...}
     return function(...)
         local args = {}
-        for _, v in ipairs(bound) do args[#args + 1] = v end
-        for _, v in ipairs({...})  do args[#args + 1] = v end
+        for _, v in ipairs(bound) do args[table.getn(args) + 1] = v end
+        for _, v in ipairs({...})  do args[table.getn(args) + 1] = v end
         return fn(unpack(args))
     end
 end
@@ -1562,12 +1562,12 @@ function funk.split(str, sep, max)
     local count = 0
     str:gsub(pattern, function(c)
         if max and count >= max then return end
-        result[#result + 1] = c
+        result[table.getn(result) + 1] = c
         count = count + 1
     end)
     -- remove trailing empty string artifact
-    if #result > 0 and result[#result] == "" then
-        result[#result] = nil
+    if table.getn(result) > 0 and result[table.getn(result)] == "" then
+        result[table.getn(result)] = nil
     end
     return result
 end
@@ -1577,7 +1577,7 @@ end
 -- lodash: _.startsWith   JS: str.startsWith(prefix)
 -- -----------------------------------------------------------------------------
 function funk.startsWith(str, prefix)
-    return str:sub(1, #prefix) == prefix
+    return str:sub(1, string.len(prefix)) == prefix
 end
 
 -- -----------------------------------------------------------------------------
@@ -1585,7 +1585,7 @@ end
 -- lodash: _.endsWith   JS: str.endsWith(suffix)
 -- -----------------------------------------------------------------------------
 function funk.endsWith(str, suffix)
-    return suffix == "" or str:sub(-#suffix) == suffix
+    return suffix == "" or str:sub(-string.len(suffix)) == suffix
 end
 
 -- -----------------------------------------------------------------------------
@@ -1621,7 +1621,7 @@ end
 -- -----------------------------------------------------------------------------
 function funk.pad(str, length, chars)
     chars = chars or " "
-    local diff = length - #str
+    local diff = length - string.len(str)
     if diff <= 0 then return str end
     local left  = math.floor(diff / 2)
     local right = diff - left
@@ -1630,14 +1630,14 @@ end
 
 function funk.padStart(str, length, chars)
     chars = chars or " "
-    local diff = length - #str
+    local diff = length - string.len(str)
     if diff <= 0 then return str end
     return funk["repeat"](chars, diff) .. str
 end
 
 function funk.padEnd(str, length, chars)
     chars = chars or " "
-    local diff = length - #str
+    local diff = length - string.len(str)
     if diff <= 0 then return str end
     return str .. funk["repeat"](chars, diff)
 end
@@ -1706,7 +1706,7 @@ function funk.isArray(v)
     if type(v) ~= "table" then return false end
     local count = 0
     for _ in pairs(v) do count = count + 1 end
-    return count == #v
+    return count == table.getn(v)
 end
 
 function funk.isObject(v)
@@ -1786,7 +1786,7 @@ function funk.functions()
     local names = {}
     for k, v in pairs(funk) do
         if type(v) == "function" then
-            names[#names + 1] = k
+            names[table.getn(names) + 1] = k
         end
     end
     table.sort(names)

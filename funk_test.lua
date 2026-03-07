@@ -30,13 +30,13 @@ local function _str(v)
     if type(v) == "table" then
         local parts = {}
         -- Try as array first
-        local isArr = (#v > 0)
+        local isArr = (table.getn(v) > 0)
         if isArr then
             for i, val in ipairs(v) do parts[i] = _str(val) end
             return "{" .. table.concat(parts, ", ") .. "}"
         else
             for k, val in pairs(v) do
-                parts[#parts + 1] = tostring(k) .. "=" .. _str(val)
+                parts[table.getn(parts) + 1] = tostring(k) .. "=" .. _str(val)
             end
             return "{" .. table.concat(parts, ", ") .. "}"
         end
@@ -76,7 +76,7 @@ local function _fail(desc, expected, got, note)
     end
     if note then msg = msg .. "  |cFFFF8C00" .. note .. "|r" end
     _out(msg)
-    _results.errors[#_results.errors + 1] = desc
+    _results.errors[table.getn(_results.errors) + 1] = desc
 end
 
 -- Deep-equality helper for assertions (re-uses funk.isEqual when available).
@@ -133,7 +133,7 @@ local F = funk_test.expectFalse
 -- ── each ────────────────────────────────────────────────────────────────────
 local function test_each()
     local acc = {}
-    funk.each({10, 20, 30}, function(v) acc[#acc+1] = v end)
+    funk.each({10, 20, 30}, function(v) acc[table.getn(acc)+1] = v end)
     E("each: collects all values",    acc, {10, 20, 30})
     E("each: returns original list",  funk.each({1}, function() end), {1})
 end
@@ -696,7 +696,7 @@ function funk_test.run()
         "Results: %d / %d passed  (%d failed)|r",
         _results.passed, total, _results.failed
     ))
-    if #_results.errors > 0 then
+    if table.getn(_results.errors) > 0 then
         _out("|cFFFF4444Failed tests:|r")
         for _, name in ipairs(_results.errors) do
             _out("  |cFFFF4444• " .. name .. "|r")

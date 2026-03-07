@@ -254,7 +254,7 @@ local func_list = {
 
 local frame, page, slots, prev_btn, next_btn, pageText
 local funcs_per_page = 12
-local total_pages = math.ceil(#func_list / funcs_per_page)
+local total_pages = math.ceil(table.getn(func_list) / funcs_per_page)
 
 local function run_demo(name)
   local fn = demo_fns[name]
@@ -280,7 +280,7 @@ local function update_page()
   end
   pageText:SetText(format("Page %d / %d", page, total_pages))
   prev_btn:SetEnabled(page > 1)
-  next_btn:SetEnabled(start_idx + funcs_per_page - 1 < #func_list)
+  next_btn:SetEnabled(start_idx + funcs_per_page - 1 < table.getn(func_list))
 end
 
 local function create_ui()
