@@ -153,7 +153,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 <tr>
   <td>Array length</td>
   <td><code>arr.length</code></td>
-  <td><code>table.getn(arr)</code> (5.0) / <code>#arr</code> (5.1+)</td>
+  <td><code>table.getn(arr)</code> — this library uses the Lua 5.0 form; <code>#arr</code> is 5.1+ only</td>
 </tr>
 <tr>
   <td>String concat</td>
@@ -1049,11 +1049,12 @@ end)
    `false` and `nil` are falsy.  `funk.compact` removes only those two values.
 
 4. **No `nil` in arrays** — Storing `nil` at an array index creates a "hole"
-   that the `#` operator and `ipairs` may not traverse past.  Use sentinel
+   that `table.getn()` and `ipairs` may not traverse past.  Use sentinel
    values instead.
 
 5. **`unpack` not `table.unpack`** — Lua 5.0/5.1 uses the global `unpack`.
-   Lua 5.2+ moved it to `table.unpack`.  All code here uses the 5.1 form.
+   Lua 5.2+ moved it to `table.unpack`.  All code here uses the Lua 5.0
+   global `unpack`.
 
 6. **No global namespace pollution** — WoW Lua has no `require`, but every
    `.toc` file receives `(addonName, addonTable)` as `...`.  All three library
