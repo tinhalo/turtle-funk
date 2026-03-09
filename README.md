@@ -9,7 +9,7 @@ Functional programming (think lodash / ramda) for TurtleWoW — written in Lua 5
 TurtleWoW add-ons are written in Lua but the WoW client ships almost no standard utility library.  This project fills that gap with a battle-tested, well-documented functional toolkit inspired by:
 
 | Reference | What we borrowed |
-|-----------|-----------------|
+|:----------|:-----------------|
 | [underscore.lua](https://github.com/mirven/underscore.lua) | Lua idioms, coroutine-based iterators |
 | [lodash](https://lodash.com/docs) | API shape, naming, chaining |
 | [ramda](https://ramdajs.com/docs) | Immutability-first, compose/pipe, type predicates |
@@ -19,7 +19,7 @@ TurtleWoW add-ons are written in Lua but the WoW client ships almost no standard
 ## Files
 
 | File | Purpose |
-|------|---------|
+|:-----|:--------|
 | `funk.lua` | Core functional library — **copy this into your addon** |
 | `funk_debug.lua` | WoW-specific debug output (chat frame, whispers, timers) |
 | `funk_test.lua` | In-game test runner (168 tests, all pass) |
@@ -55,7 +55,7 @@ local D = ns.funk_debug  -- populated by funk_debug.lua
 local doubled  = F.map({1,2,3,4}, function(x) return x * 2 end)
 -- → {2, 4, 6, 8}
 
-local evens    = F.filter({1,2,3,4,5}, function(x) return x % 2 == 0 end)
+local evens    = F.filter({1,2,3,4,5}, function(x) return math.mod(x, 2) == 0 end)
 -- → {2, 4}
 
 local total    = F.reduce({1,2,3,4}, 0, function(acc, x) return acc + x end)
@@ -92,10 +92,10 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ## JS ↔ Lua quick-reference
 
 | Concept | JavaScript | Lua |
-|---------|-----------|-----|
+|:--------|:-----------|:----|
 | Array index | `arr[0]` (0-based) | `arr[1]` (1-based) |
 | Undefined / null | `undefined` / `null` | `nil` |
-| Array length | `arr.length` | `#arr` |
+| Array length | `arr.length` | `table.getn(arr)` (5.0) / `#arr` (5.1+) |
 | String concat | `"a" + "b"` | `"a" .. "b"` |
 | Arrow function | `(x) => x * 2` | `function(x) return x*2 end` |
 | Spread | `fn(...args)` | `fn(unpack(args))` |
@@ -114,7 +114,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### Collection functions
 
 | Function | lodash equiv | ramda equiv | Description |
-|----------|-------------|-------------|-------------|
+|:---------|:-------------|:------------|:------------|
 | `F.each(list, fn)` | `_.forEach` | `R.forEach` | Iterate for side-effects |
 | `F.eachWithIndex(list, fn)` | `_.forEach` (with index) | — | Iterate with 1-based index |
 | `F.map(list, fn)` | `_.map` | `R.map` | Transform each element |
@@ -147,7 +147,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### Array functions
 
 | Function | lodash equiv | Description |
-|----------|-------------|-------------|
+|:---------|:-------------|:------------|
 | `F.first(arr, n?)` | `_.first` / `_.take` | First element or first n |
 | `F.last(arr, n?)` | `_.last` / `_.takeRight` | Last element or last n |
 | `F.rest(arr, i?)` | `_.tail` / `_.drop` | Skip first i elements (default: skip 1) |
@@ -184,7 +184,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### Object functions
 
 | Function | lodash equiv | ramda equiv | Description |
-|----------|-------------|-------------|-------------|
+|:---------|:-------------|:------------|:------------|
 | `F.keys(obj)` | `_.keys` | `R.keys` | Array of keys |
 | `F.values(obj)` | `_.values` | `R.values` | Array of values |
 | `F.entries(obj)` | `_.toPairs` | `R.toPairs` | Array of `{k, v}` pairs |
@@ -212,7 +212,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### Function utilities
 
 | Function | lodash equiv | ramda equiv | Description |
-|----------|-------------|-------------|-------------|
+|:---------|:-------------|:------------|:------------|
 | `F.identity(v)` | `_.identity` | `R.identity` | Returns its argument |
 | `F.constant(v)` | `_.constant` | `R.always` | Returns a function that always returns v |
 | `F.noop()` | `_.noop` | — | Does nothing |
@@ -235,7 +235,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### String utilities
 
 | Function | lodash / JS equiv | Description |
-|----------|--------------------|-------------|
+|:---------|:-------------------|:------------|
 | `F.trim(s)` | `_.trim` / `s.trim()` | Strip leading and trailing whitespace |
 | `F.trimStart(s)` | `_.trimStart` | Strip leading whitespace |
 | `F.trimEnd(s)` | `_.trimEnd` | Strip trailing whitespace |
@@ -257,7 +257,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
 ### Number utilities
 
 | Function | lodash equiv | Description |
-|----------|-------------|-------------|
+|:---------|:-------------|:------------|
 | `F.clamp(v, min, max)` | `_.clamp` | Constrain value to range |
 | `F.inRange(v, start, stop?)` | `_.inRange` | Check if v is in [start, stop) |
 | `F.random(lo?, hi?, float?)` | `_.random` | Random number in range |
@@ -400,7 +400,7 @@ frame:SetScript("OnEvent", function()
         local link = GetContainerItemLink(0, slot)
         if link then
             local _, count = GetContainerItemInfo(0, slot)
-            bagItems[#bagItems+1] = {link=link, count=count or 1}
+            bagItems[table.getn(bagItems)+1] = {link=link, count=count or 1}
         end
     end
 
