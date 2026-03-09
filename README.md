@@ -826,7 +826,7 @@ D.whisper("Arthas", "Your HP is %d", UnitHealth("player"))
   <td>Full lower-case</td>
 </tr>
 <tr>
-  <td><code>F<a href="s, n">"repeat"</a></code></td>
+  <td><code>F["repeat"](s, n)</code></td>
   <td><code>_.repeat</code></td>
   <td>Repeat string n times</td>
 </tr>
